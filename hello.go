@@ -40,5 +40,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
         var body []byte
       	body, err = ioutil.ReadAll(resp.Body)
         defer resp.Body.Close()
-        fmt.Fprintf(w, string(body))
+        w.Write(body)
 }
