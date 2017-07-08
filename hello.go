@@ -1,24 +1,44 @@
 package hello
 
 import (
-	"net/http"
-	"net/http/httputil"
-	"net/url"
-
-	"appengine"
-	"appengine/urlfetch"
+    "fmt"
+    "net/http"
+    "google.golang.org/appengine"
+    "google.golang.org/appengine/urlfetch"
+    "io/ioutil"
 )
-
 func init() {
-	http.HandleFunc("/", serve)
+    http.HandleFunc("/", handler)
 }
 
-func serve(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+var headers = map[string]string{
+	"User-Agent": "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+	"Referer":    "https://yun.baidu.com/share/home?uk=325913312#category/type=0",
+	"Cookie":     "",
+}
 
-	url := &url.URL{Path: "http://localhost:8888"}
+func handler(w http.ResponseWriter, r *http.Request) {
+        ctx := appengine.NewContext(r)
+        client := urlfetch.Client(ctx)
+        u := Header.Get("pu")
+        if u == ""{
+          fmt.Fprintf(w, "url empty")
+          return
+        }
+        req, err := http.NewRequest("GET", u, nil)
 
-	proxy := httputil.NewSingleHostReverseProxy(url)
-	proxy.Transport = &urlfetch.Transport{Context: c}
-	proxy.ServeHTTP(w, r)
+        for k, v := range headers {
+      		req.Header.Set(k, v)
+      	}
+
+        var resp *http.Response
+      	resp, err = client.Do(req)
+        if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+        }
+        var body []byte
+      	body, err = ioutil.ReadAll(resp.Body)
+        defer resp.Body.Close()
+        fmt.Fprintf(w, string(body))
 }
