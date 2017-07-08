@@ -20,7 +20,7 @@ var headers = map[string]string{
 func handler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         client := urlfetch.Client(ctx)
-        u := Header.Get("pu")
+        u := r.Header.Get("pu")
         if u == ""{
           fmt.Fprintf(w, "url empty")
           return
