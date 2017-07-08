@@ -20,10 +20,12 @@ var headers = map[string]string{
 func handler(w http.ResponseWriter, r *http.Request) {
         ctx := appengine.NewContext(r)
         client := urlfetch.Client(ctx)
-        resp, err := client.Get("https://www.qzhou.com.cn/")
+        req, err := http.NewRequest("GET", "https://www.qzhou.com.cn/", nil)
+
         for k, v := range headers {
       		req.Header.Set(k, v)
       	}
+
         var resp *http.Response
       	resp, err = client.Do(req)
         if err != nil {
